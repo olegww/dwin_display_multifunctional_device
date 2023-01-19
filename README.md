@@ -1,6 +1,6 @@
 ## General Information
 
-[![Build examples](https://github.com/espressif/esp32-camera/actions/workflows/build.yml/badge.svg)](https://github.com/olegww/esp32_dwin_display_multifunctional_device/commits/main) [![Component Registry](https://components.espressif.com/components/espressif/esp32-camera/badge.svg)](https://github.com/olegww/esp_32_dwin_display_multifunctional_device/releases)
+[![Build examples](https://github.com/espressif/esp32-camera/actions/workflows/build.yml/badge.svg)](https://github.com/olegww/esp32_dwin_display_multifunctional_device/commits/main) [![Component Registry](https://components.espressif.com/components/espressif/esp32-camera/badge.svg)](https://github.com/olegww/esp32_dwin_display_multifunctional_device/releases)
 
 # dwin display multifunctional device esp32
 The project of the multifunctional device ART-1 based on ESP32 with a display from the company dwin (DMG10600C070_03WTC).
