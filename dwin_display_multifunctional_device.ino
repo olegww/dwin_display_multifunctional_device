@@ -1,7 +1,12 @@
+//#include <EasyStringStream.h>
+//#include <Preferences.h>
+//Preferences preferences;
+//#include <sstream>
+//using namespace std;
 #include <EEPROM.h>
 #include <Adafruit_NeoPixel.h>
-#include <EasyStringStream.h>
 #include <GyverBME280.h>
+//#include "DFRobotDFPlayerMini.h"
 GyverBME280 bme;
 #include <DS1307ESP.h>
 DS1307ESP rtc;
@@ -11,12 +16,15 @@ DS1307ESP rtc;
 #define TXD1 19  // Пин подключения TX sim800
 #define RXD2 16  // Пин подключения RX Dwin
 #define TXD2 17  // Пин подключения TX Dwin
+//#define RXD3 13  // Пин подключения RX MP3 DFPlayer
+//#define TXD3 14  // Пин подключения TX MP3 DFPlayer
 const int COpin = 34;
 int COvalue = 0;
 
-int eepromTel1 = 0, eeprom_sound = 20, eeprom_alarm_1 = 21, eeprom_alarm_2 = 22, eeprom_hour = 23, eeprom_min = 25, eeprom_hour2 = 27, eeprom_min2 = 29, eepromTel2 = 40, eepromTel3 = 60, eepromTel4 = 80, eepromTel5 = 100, eepromTel6 = 120;
+int eepromTel1 = 160, eeprom_sound = 20, eeprom_alarm_1 = 21, eeprom_alarm_2 = 22, eeprom_hour = 23, eeprom_min = 25, eeprom_hour2 = 27, eeprom_min2 = 29, eepromTel2 = 40, eepromTel3 = 60, eepromTel4 = 80, eepromTel5 = 100, eepromTel6 = 120;
 int eeprom_CO_alarm = 32, eeprom_temp_h = 33, eeprom_temp_l = 34;
 int eeprom_temp_h_value = 145, eeprom_temp_l_value = 140;
+
 
 
 int change_data[43] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -134,9 +142,21 @@ bool flag_led = true;
 byte led_on[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x32, 0x00, 0x01 };   // Иконка будильника на главной OFF
 byte led_off[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x32, 0x00, 0x00 };  // Иконка будильника на главной ON
 //--------------END-LED------------------------
+
+//--------------CO2-Soft_serial_port_init------
 SoftwareSerial co2Serial;
 const int rx_pin = 25;  //Пин подключения RX co2 MHZ19
 const int tx_pin = 26;  //Пин подключения TX co2 MHZ19
+//----------END-CO2-Soft_serial_port_init------
+
+//--------------MP3_DFPlayer_serial_port_init------
+//DFRobotDFPlayerMini dfPlayer;
+//SoftwareSerial Serialmp3;
+//int volume = 5;
+//const int rx_pin_hw = 13;  //Пин подключения RX MP3_DFPlayer
+//const int tx_pin_hw = 14;  //Пин подключения TX MP3_DFPlayer
+//--------------MP3_DFPlayer_serial_port_init------
+
 //------------Таймеры---------------------------
 uint32_t Timer1, Timer2, Timer3, Timer4, Timer5, Timer6, Timer7, Timer8;  // Таймеры функций
 const int period_alarm = 1200;                                            // Проверка будильника
@@ -154,10 +174,10 @@ int CMonth;              // Переменная для расчета кале�
 int CDay;                // Переменная для расчета календаря  день месяца
 #include "iCalendar.h";  // Подключение функции расчета и отправки календаря
 //long long buf_dwin[50];  // Массив для функции обработки нажатий в дисплее
-char test[12];  // Буфер преобразования int в String
+//char test[12];  // Буфер преобразования int в String
 String Tel1, Tel2, Tel3, Tel4, Tel5, Tel6;
 
-EasyStringStream stack(test, 13);               // Длина строки с учетом 0го символа для +71112223344
+//EasyStringStream stack(test, 13);               // Длина строки с учетом 0го символа для +71112223344
 byte Buffer_Len = 0;                            // Длина массива для функции обработки нажатий в дисплее
 bool flag = false;                              // Флаг старта обработки для функции обработки нажатий в дисплее
 long long buf_dwin[50];                         // Массив для функции обработки нажатий в дисплее
@@ -194,7 +214,7 @@ bool startTimer = false;
 int dwin_mdetected_v;
 byte dwin_mdetected[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x10, 0x00, 0x00 };
 
-void IRAM_ATTR detectsMovement() {  // IRAM_ATTR Запуск кода прерывания в памяти RAM, для ускорения работы
+void IRAM_ATTR detectsMovement() {  // IRAM_ATTR IRAM_ATTR Запуск кода прерывания в памяти RAM, для ускорения работы
   startTimer = true;
   lastTrigger = millis();
   pir_icon_flag = true;
@@ -211,7 +231,8 @@ void setup() {
   Serial.begin(115200);
   Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1);                      // Инициализация порта подключения модуля SIM800
   Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);                      // Инициализация порта подключения дисплея
-  co2Serial.begin(115200, SWSERIAL_8N1, rx_pin, tx_pin, false, 128);  // Инициализация порта подключения датчика CO2
+  co2Serial.begin(115200, SWSERIAL_8N1, rx_pin, tx_pin, false, 128);  // Инициализация порта подключения датчика CO2 Softwareserial
+  //Serialmp3.begin(9600, SWSERIAL_8N1, RXD3, TXD3);
 
 
   //----------------ALARM--ЗВУК------------------
@@ -240,12 +261,15 @@ void setup() {
   delay(1000);
   bme.begin();  // Инициализация датчика BME280
   delay(1000);
+
   //---------------EEPROM----------------------
   /* Begin with EEPROM by deciding how much EEPROM memory you want to use.
     The ESP32's maximum EEPROM size is 4096 bytes (4 KB), but we're just using 512 bytes here.
   */
   EEPROM.begin(256);
   delay(500);
+  //preferences.begin("key", false);
+  //preferences.clear();
 
   Tel1 = EEPROM.readString(eepromTel1);
   Tel2 = EEPROM.readString(eepromTel2);
@@ -253,6 +277,18 @@ void setup() {
   Tel4 = EEPROM.readString(eepromTel4);
   Tel5 = EEPROM.readString(eepromTel5);
   Tel6 = EEPROM.readString(eepromTel6);
+  Serial.print("Tel1 :");
+  Serial.println(Tel1);
+  Serial.print("Tel2 :");
+  Serial.println(Tel2);
+  Serial.print("Tel3 :");
+  Serial.println(Tel3);
+  Serial.print("Tel4 :");
+  Serial.println(Tel4);
+  Serial.print("Tel5 :");
+  Serial.println(Tel5);
+  Serial.print("Tel6 :");
+  Serial.println(Tel6);
   sound = EEPROM.read(eeprom_sound);
   alarm_flag = EEPROM.read(eeprom_alarm_1);
   alarm_flag2 = EEPROM.read(eeprom_alarm_2);
@@ -265,6 +301,38 @@ void setup() {
   temp_l_alarm = EEPROM.read(eeprom_temp_l);                     // Состояние флага если темп меньше
   temp_h_value = EEPROM.get(eeprom_temp_h_value, temp_h_value);  // Значение температуры если темп больше
   temp_l_value = EEPROM.get(eeprom_temp_l_value, temp_l_value);  // Значение температуры если темп меньше
+  Serial.print("eeprom_alarm_1: ");
+  Serial.println(eeprom_alarm_1);
+  Serial.print("alarm_flag: ");
+  Serial.println(alarm_flag);
+  Serial.print("alarm_flag2: ");
+  Serial.println(alarm_flag2);
+  Serial.print("eeprom_alarm_2: ");
+  Serial.println(eeprom_alarm_2);
+  Serial.print("eeprom_hour: ");
+  Serial.print(eeprom_hour);
+  Serial.print(":");
+  Serial.println(eeprom_min);
+  Serial.print(eeprom_hour2);
+  Serial.print(":");
+  Serial.print("eeprom_min2: ");
+  Serial.println(eeprom_min2);
+  Serial.print("eeprom_sound: ");
+  Serial.println(eeprom_sound);
+
+  Serial.print("temp_l_alarm: ");
+  Serial.println(temp_l_alarm);
+  Serial.print("temp_h_alarm: ");
+  Serial.println(temp_h_alarm);
+
+  Serial.print("temp_h_value: ");
+  Serial.println(temp_h_value);
+  Serial.print("temp_l_value: ");
+  Serial.println(temp_l_value);
+
+
+
+
 
   byte alarm_hour_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x21, 0x00, alarm_hour };
   byte alarm_min_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x22, 0x00, alarm_min };
@@ -391,7 +459,31 @@ void setup() {
   if (!bme.begin(0x76)) Serial.println("Error!");  // Проверка доступности датчика BME280
   delay(500);
   rtc.DSread();  // Чтение модуля RTC
+  Serial.print("rtc.year: ");
+  Serial.println(rtc.year);  
+  if ((rtc.year) >= 61) {
+    rtc.DSadjust(23, 55, 00, 2022, 12, 31);  // 23:55:21 31 Dec 2022
+  }
+  /*
+  if ((rtc.year) <= 99) {
+    rtc.DSadjust(23, 55, 00, 2022, 12, 31);  // 00:19:21 16 Mar 2022
+  }
+  */
   //rtc.DSadjust(20, 37, 21, 2022, 12, 2);
+  if (alarm_hour > 24 || alarm_min > 60) {
+    alarm_hour = 0;
+    alarm_min = 0;
+    EEPROM.write(eeprom_hour, alarm_hour);
+    EEPROM.write(eeprom_min, alarm_min);
+    EEPROM.commit();
+  }
+  if (alarm_hour2 > 24 || alarm_min2 > 60) {
+    alarm_hour2 = 0;
+    alarm_min2 = 0;
+    EEPROM.write(eeprom_hour2, alarm_hour2);
+    EEPROM.write(eeprom_min2, alarm_min2);
+    EEPROM.commit();
+  }
   CYear = float(rtc.year) + 2000;  // Обновление переменных для расчета календаря с установленным временем в RTC
   //CYear = ((float)rtc.year);  // = 2022.00 Обновление переменных для расчета календаря с установленным временем в RTC
   //CYear = (rtc.year);  // дебаг без конвертации
@@ -413,10 +505,9 @@ void setup() {
   time_load();  // Отправляем текущее время в дисплей ЧЧ:ММ
   Calendar();   // Рассчитываем календарь и отправляем в дисплей
   led_rso();
-  delay(4000);
+  delay(1000);
   Serial2.write(icon__logo_off, 8);
   led_cls();
-
 }
 //=======================================================================================================================
 //------------------------------------------------------------SETUP=END--------------------------------------------------
@@ -521,7 +612,7 @@ void loop() {
     Timer8 = millis();
     alarm_sound = true;
   }
-  
+
   if (alarm_hour == alarm_hour2 && alarm_min == alarm_min2) {
     if (alarm_flag == 1 && alarm_flag2 == 1) {
       alarm_flag = false;
@@ -709,15 +800,12 @@ void timeUPD() {  // Отправляем М:Ч:С с RTC модуля на ди
     dwin_min[6] = highByte(dwin_min_v);
     dwin_min[7] = lowByte(dwin_min_v);
     Serial2.write(dwin_min, 8);
-    // Serial2.flush();
-    //Serial.println("Minute update");
     if (rtc.second == 0 && rtc.minute == 0) {
+      Serial.println("rtc.second == 0 && rtc.minute == 0");
       dwin_hour_v = (rtc.hour);
       dwin_hour[6] = highByte(dwin_hour_v);
       dwin_hour[7] = lowByte(dwin_hour_v);
       Serial2.write(dwin_hour, 8);
-      // Serial2.flush();
-      //Serial.println("Hour update");
     }
   }
   Serial2.write(dwin_sec, 8);
@@ -799,15 +887,13 @@ void alarm2() {  // Будильник 1
 //----------------------------------------------------СОБЫТИЯ ОПОВЕЩЕНИЙ-------------------------------------------------
 //=======================================================================================================================
 
-void void_CO_alarm() { 
+void void_CO_alarm() {
   if (COvalue > 1000) {
     Serial2.write(CO_icon_on, 8);
     led_R1();
-    //Serial.println(COvalue);
     if (CO_alarm) {
       sendsms_CO_alarm();
       CO_alarm = false;
-      //Serial.println(CO_alarm);
     }
     if (CO_alarm_sound) {
       byte beep3[] = { 0x5A, 0xA5, 0x05, 0x82, 0x00, 0xA0, 0x00, 0x32 };

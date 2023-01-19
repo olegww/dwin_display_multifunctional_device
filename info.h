@@ -1,4 +1,11 @@
 // Platform info ESP32-D0WD-V3 (revision 3)
+/*
+Detecting chip type... ESP32
+Chip is ESP32-D0WD-V3 (revision 3)
+Features: Wi-Fi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: c0:49:ef:e5:5d:54
+*/
 // пакет с клавиатуры пример ввода "10" в 5700  (5A A5 06 83 57 00 01 00 0A)
 // запуск буззера в дисплее (5A A5 05 82 00 A0 00 7D) пример 1 секунда последний байт время (стр. 50 dev guide) 125*8 ms = 1000 ms
 // Запись информации для графиков 5A A5 0B 82 03 10 5A A5 01 00 00 01 00 00 (12, 13 байт для данных)

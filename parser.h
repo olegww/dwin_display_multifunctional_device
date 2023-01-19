@@ -162,22 +162,27 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
         if (buf_dwin[8] == 0X01) {
           led_R1();
           Serial2.write(led_on, 8);
+          //dfPlayer.volumeUp();
         }
         if (buf_dwin[8] == 0X02) {
           led_R2();
           Serial2.write(led_on, 8);
+          //dfPlayer.volumeDown();
         }
         if (buf_dwin[8] == 0X03) {
           led_R3();
           Serial2.write(led_on, 8);
+          //dfPlayer.previous();
         }
         if (buf_dwin[8] == 0X04) {
           led_R4();
           Serial2.write(led_on, 8);
+          //dfPlayer.play(1);
         }
         if (buf_dwin[8] == 0X05) {
           led_R5();
           Serial2.write(led_on, 8);
+          //dfPlayer.next();
         }
       }
 
@@ -204,8 +209,8 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       if (buf_dwin[4] == 0X50 && buf_dwin[5] == 0X28) {  // Будильник 1 вкл/выкл запись в EEPROM
         if (buf_dwin[8] == 0X00) {                       // Если 0 флаг выкл
           alarm_flag = false;
-          //Serial.print("alarm_flag_OFF: ");
-          //Serial.println(alarm_flag);
+          Serial.print("alarm_flag_OFF: ");
+          Serial.println(alarm_flag);
           EEPROM.write(eeprom_alarm_1, alarm_flag);
           EEPROM.commit();
         }
@@ -213,22 +218,22 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
           alarm_flag = true;
           EEPROM.write(eeprom_alarm_1, alarm_flag);
           EEPROM.commit();
-          //Serial.print("alarm_flag_ON: ");
-          //Serial.println(alarm_flag);
+          Serial.print("alarm_flag_ON: ");
+          Serial.println(alarm_flag);
         }
       }
       if (buf_dwin[4] == 0X50 && buf_dwin[5] == 0X30) {  // Будильник 2 вкл/выкл запись в EEPROM
         if (buf_dwin[8] == 0X00) {                       // Если 0
           alarm_flag2 = false;
-          //Serial.print("alarm_flag_OFF2: ");
-          //Serial.println(alarm_flag2);
+          Serial.print("alarm_flag_OFF2: ");
+          Serial.println(alarm_flag2);
           EEPROM.write(eeprom_alarm_2, alarm_flag2);
           EEPROM.commit();
         }
         if (buf_dwin[8] == 0X01) {  // Если 1
           alarm_flag2 = true;
-          //Serial.print("alarm_flag_ON2: ");
-          //Serial.println(alarm_flag2);
+          Serial.print("alarm_flag_ON2: ");
+          Serial.println(alarm_flag2);
           EEPROM.write(eeprom_alarm_2, alarm_flag2);
           EEPROM.commit();
         }
@@ -244,23 +249,27 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
             alarm_hour = 23;
           }
           byte alarm_hour_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x21, 0x00, alarm_hour };
+          Serial.print("alarm_hour: ");
+          Serial.println(alarm_hour);
           Serial2.write(alarm_hour_send, 8);
           EEPROM.write(eeprom_hour, alarm_hour);
           EEPROM.commit();
         }
         if (buf_dwin[8] == 0X02) {  // Если нажата кнопка ---->> час
           alarm_hour++;
-          if (alarm_hour == 24) {
+          if (alarm_hour >= 24) {
             alarm_hour = 0;
           }
           byte alarm_hour_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x21, 0x00, alarm_hour };
+          Serial.print("alarm_hour: ");
+          Serial.println(alarm_hour);
           Serial2.write(alarm_hour_send, 8);
           EEPROM.write(eeprom_hour, alarm_hour);
           EEPROM.commit();
         }
         if (buf_dwin[8] == 0X03) {  // Если нажата кнопка <<----- минута
           alarm_min--;
-          if (alarm_min == -1) {
+          if (alarm_min <= -1) {
             alarm_min = 59;
           }
 
@@ -268,6 +277,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
           Serial2.write(alarm_min_send, 8);
           EEPROM.write(eeprom_min, alarm_min);
           EEPROM.commit();
+          alarm_min = EEPROM.read(eeprom_min);
+          Serial.print("alarm_min: ");
+          Serial.println(alarm_min);
         }
         if (buf_dwin[8] == 0X04) {  // Если нажата кнопка ------>> минута
           alarm_min++;
@@ -278,6 +290,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
           Serial2.write(alarm_min_send, 8);
           EEPROM.write(eeprom_min, alarm_min);
           EEPROM.commit();
+          alarm_min = EEPROM.read(eeprom_min);
+          Serial.print("alarm_min: ");
+          Serial.println(alarm_min);
         }
         if (buf_dwin[8] == 0X05) {  // Если нажата кнопка <<----- час2
           alarm_hour2--;
@@ -285,6 +300,8 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
             alarm_hour2 = 23;
           }
           byte alarm_hour2_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x24, 0x00, alarm_hour2 };
+          Serial.print("alarm_hour2: ");
+          Serial.println(alarm_hour2);
           Serial2.write(alarm_hour2_send, 8);
           EEPROM.write(eeprom_hour2, alarm_hour2);
           EEPROM.commit();
@@ -295,6 +312,8 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
             alarm_hour2 = 0;
           }
           byte alarm_hour2_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x24, 0x00, alarm_hour2 };
+          Serial.print("alarm_hour2: ");
+          Serial.println(alarm_hour2);
           Serial2.write(alarm_hour2_send, 8);
           EEPROM.write(eeprom_hour2, alarm_hour2);
           EEPROM.commit();
@@ -305,6 +324,8 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
             alarm_min2 = 59;
           }
           byte alarm_min2_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x26, 0x00, alarm_min2 };
+          Serial.print("alarm_min2: ");
+          Serial.println(alarm_min2);
           Serial2.write(alarm_min2_send, 8);
           EEPROM.write(eeprom_min2, alarm_min2);
           EEPROM.commit();
@@ -315,6 +336,8 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
             alarm_min2 = 0;
           }
           byte alarm_min2_send[] = { 0x5A, 0xA5, 0x05, 0x82, 0x50, 0x26, 0x00, alarm_min2 };
+          Serial.print("alarm_min2: ");
+          Serial.println(alarm_min2);
           Serial2.write(alarm_min2_send, 8);
           EEPROM.write(eeprom_min2, alarm_min2);
           EEPROM.commit();
@@ -323,7 +346,7 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       if (buf_dwin[4] == 0X50 && buf_dwin[5] == 0X31 && buf_dwin[8] == 0X01) {
         Serial2.write(night_mode_bright_on, 8);
         alarm_sound = false;
-        led_cls();        
+        led_cls();
       }
       //==========================================================================================================
       //--------------------------------------END=БУДИЛЬНИКИ------------------------------------------------------
@@ -442,7 +465,7 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
         if (buf_dwin[7] == 255) {
           temp_l_value = buf_dwin[8] - 256;
         }
-        EEPROM.put(eeprom_temp_l_value, temp_l_value); //Пишем put для любых данных, читаем get
+        EEPROM.put(eeprom_temp_l_value, temp_l_value);  //Пишем put для любых данных, читаем get
         EEPROM.commit();
       }
 
@@ -654,10 +677,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
 
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X50) {
         long long bx6 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
-        stack.reset();
-        stack << "+7" << bx6;
-        Tel6 = test;
-        String PHONE = Tel6;
+        char buffbx6[15];
+        sprintf(buffbx6, "+7%lld", bx6);
+        Tel6 = buffbx6;
         Serial.println(Tel6);
         EEPROM.writeString(eepromTel6, Tel6);
         EEPROM.commit();
@@ -673,10 +695,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       }
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X40) {
         long long bx5 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
-        stack.reset();
-        stack << "+7" << bx5;
-        Tel5 = test;
-        String PHONE = Tel5;
+        char buffbx5[15];
+        sprintf(buffbx5, "+7%lld", bx5);
+        Tel5 = buffbx5;
         Serial.println(Tel5);
         EEPROM.writeString(eepromTel5, Tel5);
         EEPROM.commit();
@@ -692,10 +713,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       }
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X30) {
         long long bx4 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
-        stack.reset();
-        stack << "+7" << bx4;
-        Tel4 = test;
-        String PHONE = Tel4;
+        char buffbx4[15];
+        sprintf(buffbx4, "+7%lld", bx4);
+        Tel4 = buffbx4;
         Serial.println(Tel4);
         EEPROM.writeString(eepromTel4, Tel4);
         EEPROM.commit();
@@ -711,10 +731,9 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       }
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X20) {
         long long bx3 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
-        stack.reset();
-        stack << "+7" << bx3;
-        Tel3 = test;
-        String PHONE = Tel3;
+        char buffbx3[15];
+        sprintf(buffbx3, "+7%lld", bx3);
+        Tel3 = buffbx3;
         Serial.println(Tel3);
         EEPROM.writeString(eepromTel3, Tel3);
         EEPROM.commit();
@@ -728,12 +747,12 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
         }
         Serial2.write(tt3, 18);
       }
+
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X10) {
-        long long bx3 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
-        stack.reset();
-        stack << "+7" << bx3;
-        Tel2 = test;
-        String PHONE = Tel2;
+        long long bx2 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
+        char buffbx2[15];
+        sprintf(buffbx2, "+7%lld", bx2);
+        Tel2 = buffbx2;
         Serial.println(Tel2);
         EEPROM.writeString(eepromTel2, Tel2);
         EEPROM.commit();
@@ -749,8 +768,33 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
       }
 
       if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X00) {
+        long long bx1 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
+        Serial.println(Tel1);
+        char buffbx1[15];
+        sprintf(buffbx1, "+7%lld", bx1);
+        Tel1 = buffbx1;
+        Serial.println(Tel1);
+        EEPROM.writeString(eepromTel1, Tel1);
+        EEPROM.commit();
+        Serial.println("stringData write eepromTel1 in EEPROM is Successful");
+        Serial.println(Tel1);
+        Tel1 = EEPROM.readString(eepromTel1);
+        char Buf1[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        char tt1[] = { 0x5a, 0xa5, 0x0f, 0x82, 0x71, 0x00, 0x2b, 0x37, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        Tel1.toCharArray(Buf1, 13);  // 7100 номер телефона сигнализация/владелец
+        for (int i = 8; i < 18; i++) {
+          tt1[i] = Buf1[i - 6];
+        }
+        Serial2.write(tt1, 18);
+
+        Buf1[0];
+      }
+      /*
+
+      if (buf_dwin[4] == 0X70 && buf_dwin[5] == 0X00) {
         long long bx3 = buf_dwin[10] << 32 | buf_dwin[11] << 24 | buf_dwin[12] << 16 | buf_dwin[13] << 8 | buf_dwin[14];
         stack.reset();
+        delay(30);
         stack << "+7" << bx3;
         Tel1 = test;
         String PHONE = Tel1;
@@ -770,6 +814,7 @@ void IRAM_ATTR dwin_parsing() {  //  IRAM_ATTR Функция обработки
 
         Buf1[0];
       }
+      */
 
       /*
       // Пакет для отображения телефона String 5a a5 0f 82 70 60 2b 37 39 32 36 36 35 30 31 34 36 36

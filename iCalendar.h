@@ -139,7 +139,7 @@ void Calendar() {
     int Blok = 0;  // Переменная, которая определяет первый файл типа иконки числа, соответствующих определенному дню месяца календаря
     if (i % 7 == 0 || (i + 1) % 7 == 0) {
       Blok = 31;                                                                                          // 2-й блок иконок: обычные Сб и Вс
-                                                                                                          /*
+/*
       Serial.print("CYear: ");
       Serial.println(CYear);
       Serial.print("rtc.year: ");
@@ -158,12 +158,11 @@ void Calendar() {
     //Serial2.flush(); // Ждем до завершения передачи
     //Serial.print(Registr);Serial.print(":");Serial.print(A[7]);Serial.println("#"); //Печать для проверки правильности расчетов HEX
   }
-  //Serial.print("№№№№№№№№№№");
   dwin_year_v = (CYear);
   dwin_year[6] = highByte(dwin_year_v);
   dwin_year[7] = lowByte(dwin_year_v);
   Serial2.write(dwin_year, 8);
-  // Serial2.flush();
+
   dwin_month_v = (CMonth);
   dwin_month[6] = highByte(dwin_month_v);
   dwin_month[7] = lowByte(dwin_month_v);
