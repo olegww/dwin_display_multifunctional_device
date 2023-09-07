@@ -460,7 +460,7 @@ void setup() {
   delay(500);
   rtc.DSread();  // Чтение модуля RTC
   Serial.print("rtc.year: ");
-  Serial.println(rtc.year);  
+  Serial.println(rtc.year);
   if ((rtc.year) >= 61) {
     rtc.DSadjust(23, 55, 00, 2022, 12, 31);  // 23:55:21 31 Dec 2022
   }
@@ -751,11 +751,15 @@ void dateUPDCal() {  // Отправляем значения ДД/ММ/ГГГГ
   dwin_year[6] = highByte(dwin_year_v);
   dwin_year[7] = lowByte(dwin_year_v);
   Serial2.write(dwin_year, 8);
+    Serial.print("dateUPDCal()() dwin_year_v: ");
+  Serial.println(dwin_year_v);
   // Serial2.flush();
   dwin_month_v = (CMonth);
   dwin_month[6] = highByte(dwin_month_v);
   dwin_month[7] = lowByte(dwin_month_v);
   Serial2.write(dwin_month, 8);
+      Serial.print("dateUPDCal()() dwin_month_v: ");
+  Serial.println(dwin_month_v);
   // Serial2.flush();
   dwin_day_v = (CDay);
   dwin_day[6] = highByte(dwin_day_v);
@@ -770,6 +774,9 @@ void weekUPD() {
   dwin_day_week[6] = highByte(dwin_week_v);
   dwin_day_week[7] = lowByte(dwin_week_v);
   Serial2.write(dwin_day_week, 8);  // День недели
+  Serial.print("weekUPD() dwin_week_v: ");
+  Serial.println(dwin_week_v);
+
 }
 
 void dateUPD() {  // Отправляем значения ДД/ММ/ГГГГ из глобальных переменных в дисплей
@@ -806,6 +813,12 @@ void timeUPD() {  // Отправляем М:Ч:С с RTC модуля на ди
       dwin_hour[6] = highByte(dwin_hour_v);
       dwin_hour[7] = lowByte(dwin_hour_v);
       Serial2.write(dwin_hour, 8);
+      if (rtc.hour == 0) {
+        weekUPD();
+        dateReset();  // Отправляем текущую дату в дисплей
+        time_load();  // Отправляем текущее время в дисплей ЧЧ:ММ
+        Calendar();  // Рассчитываем календарь и отправляем в дисплей
+      }
     }
   }
   Serial2.write(dwin_sec, 8);
